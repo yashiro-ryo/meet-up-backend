@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -29,7 +30,17 @@ type Team struct {
 
 func SetupDB() {
 	fmt.Println("setup database")
-	db, err = sql.Open("mysql", "root:LTDEXPuzushio22@@tcp(localhost:3306)/meet-up?parseTime=true")
+	fmt.Println("build target :", os.Getenv("BuildEnv"))
+	var dbConfig = ""
+	if os.Getenv("BuildEnv") == "prod" {
+		dbConfig = "admin:LTDEXPuzushio22@tcp(meet-up-test-db.cmlapankyd1a.ap-northeast-1.rds.amazonaws.com:3306)/meet_up?parseTime=true"
+	} else if os.Getenv("BuildEnv") == "dev" {
+		dbConfig = "root:LTDEXPuzushio22@@tcp(localhost:3306)/meet-up?parseTime=true"
+	} else {
+		fmt.Println("db connection error")
+	}
+	fmt.Println(dbConfig)
+	db, err = sql.Open("mysql", dbConfig)
 	if err != nil {
 		// ここではエラーを返さない
 		log.Fatal(err)
